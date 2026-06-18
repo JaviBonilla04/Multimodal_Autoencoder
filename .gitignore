@@ -1,0 +1,18 @@
+# datos
+datasets/
+
+# entorno virtual
+venv/
+.venv/
+
+# caché de Python
+__pycache__/
+*.pyc
+
+# modelos guardados (suelen ser pesados)
+*.pt
+*.pth
+
+# configuración de editor
+.vscode/
+.idea/
