@@ -11,6 +11,8 @@ from multimodal_autoencoder import MultimodalAutoencoder
 from dataset_handler import MultimodalDataset, MultimodalCSVDataset, Preprocessor, build_schema
 from multimodal_loss import multimodal_loss
 
+import pickle
+
 IMG_DIR = "C:\\Users\\JB\\Desktop\\ML_Proyectos\\multimodal_learning\\autoencoder\\datasets\\imgs_part_1\\imgs_part_1"
 
 device 	= torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -18,8 +20,9 @@ device 	= torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def main(): 
 	df = pd.read_csv("datasets\\metadata.csv")
 
+	# -- all of the columns except the diagnostic
 	numeric_cols = ["age", "fitspatrick", "diameter_1", "diameter_2"]
-	multiclass_cols = ["background_father", "background_mother", "region", "diagnostic", "itch", "grew", "hurt", "changed", "bleed", "elevation"]
+	multiclass_cols = ["background_father", "background_mother", "region", "itch", "grew", "hurt", "changed", "bleed", "elevation"]
 	binary_cols = ["smoke", "drink", "pesticide", "gender", "skin_cancer_history", "cancer_history", "has_piped_water", "has_sewage_system"]
 	image_col = "img_id"
 
@@ -77,6 +80,9 @@ def main():
 		z = model.encode(b)
 		print("forma del latente:", tuple(z.shape))
 
+	torch.save(model.state_dict(), "trained_models/autoencoder1.pt")
+	with open("Preprocessor.pkl", "wb") as f:
+		pickle.dump(pre, f)
 
 if __name__=="__main__":
 	main()
