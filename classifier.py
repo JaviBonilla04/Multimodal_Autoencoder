@@ -4,6 +4,9 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
+from typing import List, Dict
+from dataclasses import dataclass
+
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 
@@ -28,7 +31,7 @@ MULTICLASS_COLS = ["background_father", "background_mother", "region", "itch", "
 BINARY_COLS 	= ["smoke", "drink", "pesticide", "gender", "skin_cancer_history", "cancer_history", "has_piped_water", "has_sewage_system"]
 IMAGE_COL 		= "img_id"
 
-CANCER = {"BBC", "MEL", "SCC"} # -- the categories on the diagnostic column that represent a type of cancer
+CANCER = {"BCC", "MEL", "SCC"} # -- the categories on the diagnostic column that represent a type of cancer
 
 def extract_lantent(df, pre, model, device):
 	ds 		= MultimodalCSVDataset(df, pre, IMAGE_DIR, IMAGE_COL, img_size=IMG_SIZE)
@@ -154,7 +157,7 @@ def main():
 	print(f"	Accuracy	:	{m['acc']:.3f}")
 	print(f"	Precision	: 	{m['prec']:.3f}")
 	print(f"	Recall		: 	{m['rec']:.3f}")
-	print(f"	F1			: 	{m['f1']:.3f}")
+	print(f"	F1		: 	{m['f1']:.3f}")
 	print(f"\n Confusion Matrix:			")
 	print(f"                 	 pred neg   		pred pos")
 	print(f"    real neg  |    {m['tn']:5d}      {m['fp']:5d}")

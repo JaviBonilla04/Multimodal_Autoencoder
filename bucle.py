@@ -3,17 +3,22 @@ import torch.nn as nn
 import torch
 from torch.utils.data import Dataset
 
+from typing import List, Dict
+from dataclasses import dataclass
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np
 
 from multimodal_autoencoder import MultimodalAutoencoder
 from dataset_handler import MultimodalDataset, MultimodalCSVDataset, Preprocessor, build_schema
-from multimodal_loss import multimodal_loss
+from multimodal_loss import multimodal_loss, LossSchema, graph_loss_schema
 
 import pickle
 
 IMG_DIR = "C:\\Users\\JB\\Desktop\\ML_Proyectos\\multimodal_learning\\autoencoder\\datasets\\imgs_part_1\\imgs_part_1"
+
+EPOCH = 11
 
 device 	= torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -56,23 +61,45 @@ def main():
 		n_binary 			= schema.n_binary,
 		img_ch 				= schema.img_channels,
 		img_size 			= schema.image_size,
-		latent_dim 			= 32
+		latent_dim 			= 128
 	).to(device)
 
 	opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+	loss_multimodal : List = []
+	loss_num 		: List = []
+	loss_cat 		: List = []
+	loss_bin 		: List = []
+	loss_img 		: List = []
 
 	model.train()
-	for epoch in range(1, 11):
+	for epoch in range(1, EPOCH):
 		total = 0.0
 		for b in train_loader:
 			b = {k: v.to(device) for k, v in b.items()}
 			opt.zero_grad()
 			recon, z = model(b)
-			loss = multimodal_loss(recon, b)
+			
+			loss, loss_schema = multimodal_loss(recon, b)
+
+			loss_multimodal.append(loss)
+			loss_num.append(loss_schema.loss_num)
+			loss_cat.append(loss_schema.loss_cat)
+			loss_bin.append(loss_schema.loss_bin)
+			loss_img.append(loss_schema.loss_img)
+			
 			loss.backward()
 			opt.step()
 			total += loss.item()
 		print(f"epoch {epoch:2d} | loss {total/len(train_loader):.4f}")
+
+	hist = {
+		"loss_num"	: loss_num,
+		"loss_cat"	: loss_cat,
+		"loss_bin"	: loss_bin,
+		"loss_img"	: loss_img,
+	}
+
+	graph_loss_schema(hist, save="perdidas_10xloss_img.png")
 
 	model.eval()
 	with torch.no_grad():
